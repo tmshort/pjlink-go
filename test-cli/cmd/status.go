@@ -15,9 +15,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/rsnullptr/pjlink"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -80,9 +78,4 @@ func init() {
 	}
 
 	rootCmd.AddCommand(statusCmd, turnOnOff)
-}
-
-func printResponse(resp *pjlink.PJResponse) {
-	blob, _ := json.Marshal(resp)
-	fmt.Fprintf(os.Stdout, string(blob))
 }

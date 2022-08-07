@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rsnullptr/pjlink"
 	"os"
@@ -100,4 +101,9 @@ func createProjector(ip string, password string) *pjlink.PJProjector {
 	}
 
 	return pjlink.NewProjector(ip, password)
+}
+
+func printResponse(resp *pjlink.PJResponse) {
+	blob, _ := json.Marshal(resp)
+	fmt.Fprintln(os.Stdout, string(blob))
 }
