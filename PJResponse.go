@@ -17,11 +17,11 @@ func NewPJResponse() *PJResponse {
 
 func (res *PJResponse) Parse(raw string) error {
 	// If password is wrong, response will be 'PJLINK ERRA'
-	if strings.Contains(raw, "ERRA") {
-		return errors.New("Incorrect password")
+	if strings.Contains(raw, ERRA) {
+		return errors.New("incorrect password")
 	}
 	if len(raw) == 0 {
-		return errors.New("Empty Response")
+		return errors.New("empty Response")
 	}
 
 	tokens := strings.Split(raw, " ")
@@ -39,8 +39,8 @@ func (res *PJResponse) Parse(raw string) error {
 }
 
 // Checks if a Command was a success
-func (res *PJResponse) Success() (bool) {
-	if res.Response[0] == "OK" {
+func (res *PJResponse) Success() bool {
+	if res.Response[0] == OK {
 		return true
 	}
 	return false

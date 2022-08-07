@@ -5,12 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"os"
 	"strings"
 	"time"
 )
 
 const pjLinkPort = "4352"
+const ON = "on"
+const OFF = "off"
+const ERRA = "ERRA"
+const OK = "OK"
 
 type PJProjector struct {
 	Address  string
@@ -136,9 +139,9 @@ func (pr *PJProjector) SendRequest(request PJRequest) (*PJResponse, error) {
 		response, requestError := pr.sendRawRequest(request)
 		if requestError != nil {
 			return nil, requestError
-		} else {
-			return response, nil
 		}
+
+		return response, nil
 	}
 }
 
@@ -147,7 +150,7 @@ func (pr *PJProjector) sendRawRequest(request PJRequest) (*PJResponse, error) {
 	connection, connectionError := pr.connectToPJLink()
 	defer func() {
 		if connection == nil {
-			fmt.Fprintf(os.Stderr, "connection is nil.")
+			return
 		}
 
 		connection.Close()
@@ -202,9 +205,9 @@ func (pr *PJProjector) connectToPJLink() (net.Conn, error) {
 
 	connection, connectionError := net.DialTimeout(protocol, net.JoinHostPort(pr.Address, pr.Port), time.Duration(timeout)*time.Second)
 	if connectionError != nil {
-		return connection, errors.New("failed to establish a connection with " +
-			"pjlink device. error msg: " + connectionError.Error())
+		return nil, fmt.Errorf("failed to establish a connection with device @ %s. error msg: %s", pr.Address, connectionError.Error())
 	}
+
 	return connection, connectionError
 }
 

@@ -16,12 +16,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/rsnullptr/pjlink-go"
 	"github.com/spf13/cobra"
 	"os"
 )
-
-const ON = "on"
-const OFF = "off"
 
 func init() {
 	// statusCmd represents the status command
@@ -47,13 +45,13 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			proj := createProjector(projectorIp, password)
 
-			if len(args) == 0 || (args[0] != ON && args[0] != OFF) {
+			if len(args) == 0 || (args[0] != pjlink.ON && args[0] != pjlink.OFF) {
 				fmt.Fprintf(os.Stderr, "must specify action: <on> / <off>. exit.")
 				os.Exit(1)
 			}
 			fmt.Fprintf(os.Stderr, "Turning %s projector @ %s... \n", args[0], projectorIp)
 
-			if args[0] == ON {
+			if args[0] == pjlink.ON {
 				err := proj.TurnOn()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, err.Error())
@@ -61,7 +59,7 @@ func init() {
 
 			}
 
-			if args[0] == OFF {
+			if args[0] == pjlink.OFF {
 				err := proj.TurnOff()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, err.Error())
