@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/rsnullptr/pjlink/test-cli/cmd"
+import "github.com/rsnullptr/pjlink-go/test-cli/cmd"
 
 func main() {
 	cmd.Execute()

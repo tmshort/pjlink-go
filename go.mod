@@ -1,4 +1,4 @@
-module github.com/rsnullptr/pjlink
+module github.com/rsnullptr/pjlink-go
 
 go 1.18
 

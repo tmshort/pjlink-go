@@ -17,7 +17,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rsnullptr/pjlink"
+	"github.com/rsnullptr/pjlink-go"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
