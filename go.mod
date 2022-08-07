@@ -1,9 +1,8 @@
-module pjlink
+module github.com/rsnullptr/pjlink
 
 go 1.18
 
 require (
-	github.com/LightInstruments/pjlink v0.0.0-20180509124124-bdb7c6b2fb68
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0

@@ -15,61 +15,74 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/LightInstruments/pjlink"
+	"github.com/rsnullptr/pjlink"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 )
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Display status of Projector",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		if projectorIp == "" {
-			fmt.Println("projectorIp has to be specified.")
-			os.Exit(1)
-		}
-
-		proj := pjlink.NewProjector(projectorIp, password)
-
-		stat, err := proj.GetPowerStatus()
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Println(stat)
-		}
-
-
-		err = proj.TurnOn()
-		if err != nil {
-			log.Println(err)
-		}
-
-		stat, err = proj.GetPowerStatus()
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Println(stat)
-		}
-
-		err = proj.TurnOff()
-		if err != nil {
-			log.Println(err)
-		}
-
-		stat, err = proj.GetPowerStatus()
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Println(stat)
-		}
-
-	},
-}
+const ON = "on"
+const OFF = "off"
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	// statusCmd represents the status command
+	var statusCmd = &cobra.Command{
+		Use:   "status",
+		Short: "Display status of Projector",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Fprintf(os.Stderr, "Status of projector @ %s... \n", projectorIp)
+
+			stat, err := createProjector(projectorIp, password).GetPowerStatus()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, err.Error())
+			} else {
+				printResponse(stat)
+			}
+		},
+	}
+
+	var turnOnOff = &cobra.Command{
+		Use:   "turn <on/off>",
+		Short: "Turn projector on or off",
+		Run: func(cmd *cobra.Command, args []string) {
+			proj := createProjector(projectorIp, password)
+
+			if len(args) == 0 || (args[0] != ON && args[0] != OFF) {
+				fmt.Fprintf(os.Stderr, "must specify action: <on> / <off>. exit.")
+				os.Exit(1)
+			}
+			fmt.Fprintf(os.Stderr, "Turning %s projector @ %s... \n", args[0], projectorIp)
+
+			if args[0] == ON {
+				err := proj.TurnOn()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, err.Error())
+				}
+
+			}
+
+			if args[0] == OFF {
+				err := proj.TurnOff()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, err.Error())
+				}
+			}
+
+			stat, err := proj.GetPowerStatus()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, err.Error())
+			} else {
+				printResponse(stat)
+			}
+		},
+	}
+
+	rootCmd.AddCommand(statusCmd, turnOnOff)
+}
+
+func printResponse(resp *pjlink.PJResponse) {
+	blob, _ := json.Marshal(resp)
+	fmt.Fprintf(os.Stdout, string(blob))
 }

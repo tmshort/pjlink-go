@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/rsnullptr/pjlink"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -58,7 +59,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.test-cli.yaml)")
-	rootCmd.PersistentFlags().StringVar(&projectorIp, "projectorIp", "", "Ip of the Projector")
+	rootCmd.PersistentFlags().StringVar(&projectorIp, "ip", "", "Ip of the Projector")
 	rootCmd.PersistentFlags().StringVar(&password, "password", "", "Password of the Projector")
 }
 
@@ -86,4 +87,17 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func createProjector(ip string, password string) *pjlink.PJProjector {
+	if projectorIp == "" {
+		fmt.Fprintf(os.Stderr, "ip has to be specified.")
+		os.Exit(1)
+	}
+
+	if password == "" {
+		fmt.Fprintf(os.Stderr, "no password being used.")
+	}
+
+	return pjlink.NewProjector(ip, password)
 }

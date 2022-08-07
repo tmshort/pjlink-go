@@ -3,7 +3,9 @@ package pjlink
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"net"
+	"os"
 	"strings"
 	"time"
 )
@@ -38,7 +40,7 @@ func (pr *PJProjector) GetPowerStatus() (*PJResponse, error) {
 	return pr.SendRequest(req)
 }
 
-func (pr *PJProjector) TurnOn() (error) {
+func (pr *PJProjector) TurnOn() error {
 	req := PJRequest{
 		Class:     1,
 		Command:   "POWR",
@@ -48,13 +50,13 @@ func (pr *PJProjector) TurnOn() (error) {
 	if err != nil {
 		return err
 	}
-	if resp.Success(){
+	if resp.Success() {
 		return nil
 	}
 	return errors.New("Could not turn on Projector")
 }
 
-func (pr *PJProjector) TurnOff() (error) {
+func (pr *PJProjector) TurnOff() error {
 	req := PJRequest{
 		Class:     1,
 		Command:   "POWR",
@@ -64,7 +66,7 @@ func (pr *PJProjector) TurnOff() (error) {
 	if err != nil {
 		return err
 	}
-	if resp.Success(){
+	if resp.Success() {
 		return nil
 	}
 	return errors.New("Could not turn off Projector")
@@ -143,7 +145,13 @@ func (pr *PJProjector) SendRequest(request PJRequest) (*PJResponse, error) {
 func (pr *PJProjector) sendRawRequest(request PJRequest) (*PJResponse, error) {
 	//establish TCP connection with PJLink device
 	connection, connectionError := pr.connectToPJLink()
-	defer connection.Close()
+	defer func() {
+		if connection == nil {
+			fmt.Fprintf(os.Stderr, "connection is nil.")
+		}
+
+		connection.Close()
+	}()
 
 	if connectionError != nil {
 		return nil, connectionError
@@ -171,7 +179,6 @@ func (pr *PJProjector) sendRawRequest(request PJRequest) (*PJResponse, error) {
 
 	seed := pr.checkAuthentication(challenge)
 	stringCommand := request.toRaw(seed, pr.Password)
-
 
 	//send command
 	connection.Write([]byte(stringCommand))
