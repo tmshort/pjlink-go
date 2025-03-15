@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package util
 
 import (
 	"fmt"
-	"github.com/rsnullptr/pjlink-go"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/tmshort/pjlink-go/pkg/pjlink"
+
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -32,7 +34,7 @@ func init() {
 
 			stat, err := createProjector(projectorIp, password).GetPowerStatus()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
+				fmt.Fprintf(os.Stderr, "%s", err.Error())
 			} else {
 				printResponse(stat)
 			}
@@ -54,7 +56,7 @@ func init() {
 			if args[0] == pjlink.ON {
 				err := proj.TurnOn()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, err.Error())
+					fmt.Fprintf(os.Stderr, "%s", err.Error())
 				}
 
 			}
@@ -62,13 +64,13 @@ func init() {
 			if args[0] == pjlink.OFF {
 				err := proj.TurnOff()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, err.Error())
+					fmt.Fprintf(os.Stderr, "%s", err.Error())
 				}
 			}
 
 			stat, err := proj.GetPowerStatus()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
+				fmt.Fprintf(os.Stderr, "%s", err.Error())
 			} else {
 				printResponse(stat)
 			}

@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package util
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rsnullptr/pjlink-go"
 	"os"
+
+	"github.com/tmshort/pjlink-go/pkg/pjlink"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"

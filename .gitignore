@@ -1,6 +1,1 @@
-pjlink-microservice
-/.idea/.gitignore
-/main
-/.idea/modules.xml
-/.idea/pjlink.iml
-/.idea/vcs.xml
+bin/

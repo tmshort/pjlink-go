@@ -14,8 +14,8 @@
 
 package main
 
-import "github.com/rsnullptr/pjlink-go/test-cli/cmd"
+import "github.com/tmshort/pjlink-go/cmd/util"
 
 func main() {
-	cmd.Execute()
+	util.Execute()
 }
