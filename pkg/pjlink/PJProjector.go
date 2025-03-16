@@ -15,16 +15,19 @@ const OFF = "off"
 const ERRA = "ERRA"
 const OK = "OK"
 
-type PJProjector struct {
+type Projector struct {
 	Address  string
 	Port     string
 	Password string
 }
 
-func NewProjector(IP string, password string) *PJProjector {
-	return &PJProjector{
-		Address:  IP,
-		Port:     pjLinkPort,
+func NewProjector(ip, port, password string) *Projector {
+	if port == "0" || port == "" {
+		port = pjLinkPort
+	}
+	return &Projector{
+		Address:  ip,
+		Port:     port,
 		Password: password,
 	}
 }
@@ -33,9 +36,9 @@ func NewProjector(IP string, password string) *PJProjector {
 //--------------- Functional Calls -----------------------------------------------------------------------------------//
 //--------------------------------------------------------------------------------------------------------------------//
 
-//--------------- Power ----------------------------------------------------------------------------------------------//
-func (pr *PJProjector) GetPowerStatus() (*PJResponse, error) {
-	req := PJRequest{
+// --------------- Power ----------------------------------------------------------------------------------------------//
+func (pr *Projector) GetPowerStatus() (*Response, error) {
+	req := Request{
 		Class:     1,
 		Command:   "POWR",
 		Parameter: "?",
@@ -43,8 +46,8 @@ func (pr *PJProjector) GetPowerStatus() (*PJResponse, error) {
 	return pr.SendRequest(req)
 }
 
-func (pr *PJProjector) TurnOn() error {
-	req := PJRequest{
+func (pr *Projector) PowerOn() error {
+	req := Request{
 		Class:     1,
 		Command:   "POWR",
 		Parameter: "1",
@@ -56,11 +59,11 @@ func (pr *PJProjector) TurnOn() error {
 	if resp.Success() {
 		return nil
 	}
-	return errors.New("Could not turn on Projector")
+	return errors.New("could not turn on Projector")
 }
 
-func (pr *PJProjector) TurnOff() error {
-	req := PJRequest{
+func (pr *Projector) PowerOff() error {
+	req := Request{
 		Class:     1,
 		Command:   "POWR",
 		Parameter: "0",
@@ -72,17 +75,17 @@ func (pr *PJProjector) TurnOff() error {
 	if resp.Success() {
 		return nil
 	}
-	return errors.New("Could not turn off Projector")
+	return errors.New("could not turn off Projector")
 }
 
-func (self *PJProjector) GetProperty(property string) (string, error) {
-	var request PJRequest
+func (p *Projector) GetProperty(property string) (string, error) {
+	var request Request
 
 	request.Class = 1
 	request.Command = property
 	request.Parameter = "?"
 
-	resp, err := self.SendRequest(request)
+	resp, err := p.SendRequest(request)
 
 	if err != nil {
 		return "", err
@@ -96,43 +99,38 @@ func (self *PJProjector) GetProperty(property string) (string, error) {
 	return resp.Response[0], nil
 }
 
-func (self *PJProjector) GetPropertyArray(property string) ([]string, error) {
-	var request PJRequest
+func (p *Projector) GetPropertyArray(property string) ([]string, error) {
+	var request Request
 
 	request.Class = 1
 	request.Command = property
 	request.Parameter = "?"
 
-	resp, err := self.SendRequest(request)
+	resp, err := p.SendRequest(request)
 
 	if err != nil {
 		return make([]string, 0), err
 	}
 
-	/*	log.Printf("response size for %s: %d\n", property, len(resp.Response))
-		for i := 0; i < len(resp.Response); i++ {
-			log.Printf("response %d: %s\n", i, resp.Response[i])
-		} */
-
 	return resp.Response, nil
 }
 
-func (self *PJProjector) SetProperty(property string, val string) error {
-	var request PJRequest
+func (p *Projector) SetProperty(property string, val string) error {
+	var request Request
 
 	request.Class = 1
 	request.Command = property
 	request.Parameter = val
 
-	_, err := self.SendRequest(request)
+	_, err := p.SendRequest(request)
 
 	return err
 }
 
-//--------------------------------------------------------------------------------------------------------------------//
+// --------------------------------------------------------------------------------------------------------------------//
 // Low-Level Calls
-//--------------------------------------------------------------------------------------------------------------------//
-func (pr *PJProjector) SendRequest(request PJRequest) (*PJResponse, error) {
+// --------------------------------------------------------------------------------------------------------------------//
+func (pr *Projector) SendRequest(request Request) (*Response, error) {
 	if err := request.Validate(); err != nil { //malformed command, don't send
 		return nil, err
 	} else { //send request and parse response into struct
@@ -145,7 +143,7 @@ func (pr *PJProjector) SendRequest(request PJRequest) (*PJResponse, error) {
 	}
 }
 
-func (pr *PJProjector) sendRawRequest(request PJRequest) (*PJResponse, error) {
+func (pr *Projector) sendRawRequest(request Request) (*Response, error) {
 	//establish TCP connection with PJLink device
 	connection, connectionError := pr.connectToPJLink()
 	defer func() {
@@ -196,10 +194,10 @@ func (pr *PJProjector) sendRawRequest(request PJRequest) (*PJResponse, error) {
 	return resp, nil
 }
 
-//attempts to establish a TCP socket with the specified IP:port
-//success: returns populated pjlinkConn struct and nil error
-//failure: returns empty pjlinkConn and error
-func (pr *PJProjector) connectToPJLink() (net.Conn, error) {
+// attempts to establish a TCP socket with the specified IP:port
+// success: returns populated pjlinkConn struct and nil error
+// failure: returns empty pjlinkConn and error
+func (pr *Projector) connectToPJLink() (net.Conn, error) {
 	protocol := "tcp" //PJLink always uses TCP
 	timeout := 10     //represents seconds
 
@@ -212,7 +210,7 @@ func (pr *PJProjector) connectToPJLink() (net.Conn, error) {
 }
 
 // check if this Projector uses authentication. If so return true and the given seed. Otherwise false and an empty string.
-func (pr *PJProjector) checkAuthentication(response []string) (seed string) {
+func (pr *Projector) checkAuthentication(response []string) (seed string) {
 	if response[0] != "PJLINK" {
 		return ""
 	}

@@ -5,17 +5,17 @@ import (
 	"strings"
 )
 
-type PJResponse struct {
+type Response struct {
 	Class    string   `json:"class"`
 	Command  string   `json:"command"`
 	Response []string `json:"response"`
 }
 
-func NewPJResponse() *PJResponse {
-	return &PJResponse{}
+func NewPJResponse() *Response {
+	return &Response{}
 }
 
-func (res *PJResponse) Parse(raw string) error {
+func (res *Response) Parse(raw string) error {
 	// If password is wrong, response will be 'PJLINK ERRA'
 	if strings.Contains(raw, ERRA) {
 		return errors.New("incorrect password")
@@ -27,8 +27,8 @@ func (res *PJResponse) Parse(raw string) error {
 	tokens := strings.Split(raw, " ")
 
 	token0 := tokens[0]
-	param1 := []string{token0[7:len(token0)]}
-	paramsN := tokens[1:len(tokens)]
+	param1 := []string{token0[7:]}
+	paramsN := tokens[1:]
 	params := append(param1, paramsN...)
 
 	res.Class = token0[1:2]
@@ -39,9 +39,6 @@ func (res *PJResponse) Parse(raw string) error {
 }
 
 // Checks if a Command was a success
-func (res *PJResponse) Success() bool {
-	if res.Response[0] == OK {
-		return true
-	}
-	return false
+func (res *Response) Success() bool {
+	return res.Response[0] == OK
 }

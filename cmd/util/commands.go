@@ -21,18 +21,29 @@ import (
 	"github.com/tmshort/pjlink-go/pkg/pjlink"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
 	// statusCmd represents the status command
+	var configCmd = &cobra.Command{
+		Use:   "writeconfig",
+		Short: "Display current configuration",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Writing config file")
+			if err := viper.SafeWriteConfig(); err != nil {
+				fmt.Fprintln(os.Stderr, "error in WriteConfig", err)
+			}
+		},
+	}
+
 	var statusCmd = &cobra.Command{
 		Use:   "status",
 		Short: "Display status of Projector",
-		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintf(os.Stderr, "Status of projector @ %s... \n", projectorIp)
+			fmt.Fprintf(os.Stderr, "Status of projector... \n")
 
-			stat, err := createProjector(projectorIp, password).GetPowerStatus()
+			stat, err := createProjector().GetPowerStatus()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s", err.Error())
 			} else {
@@ -41,28 +52,27 @@ func init() {
 		},
 	}
 
-	var turnOnOff = &cobra.Command{
-		Use:   "turn <on/off>",
-		Short: "Turn projector on or off",
+	var powerOnOff = &cobra.Command{
+		Use:   "power <on/off>",
+		Short: "Power projector on or off",
 		Run: func(cmd *cobra.Command, args []string) {
-			proj := createProjector(projectorIp, password)
+			proj := createProjector()
 
 			if len(args) == 0 || (args[0] != pjlink.ON && args[0] != pjlink.OFF) {
-				fmt.Fprintf(os.Stderr, "must specify action: <on> / <off>. exit.")
+				fmt.Fprintf(os.Stderr, "must specify action: 'on' or 'off'")
 				os.Exit(1)
 			}
-			fmt.Fprintf(os.Stderr, "Turning %s projector @ %s... \n", args[0], projectorIp)
+			fmt.Fprintf(os.Stderr, "Powering %s projector...\n", args[0])
 
 			if args[0] == pjlink.ON {
-				err := proj.TurnOn()
+				err := proj.PowerOn()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "%s", err.Error())
 				}
-
 			}
 
 			if args[0] == pjlink.OFF {
-				err := proj.TurnOff()
+				err := proj.PowerOff()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "%s", err.Error())
 				}
@@ -77,5 +87,5 @@ func init() {
 		},
 	}
 
-	rootCmd.AddCommand(statusCmd, turnOnOff)
+	rootCmd.AddCommand(configCmd, statusCmd, powerOnOff)
 }
